@@ -46,7 +46,6 @@ def get_course_graph(dept, number):
                     "id": f"e-{curr_course.dept}-{curr_course.number}-{prereq.dept}-{prereq.number}",
                     "source": f"{curr_course.dept}-{curr_course.number}",
                     "target": f"{prereq.dept}-{prereq.number}",
-                    "animated": True,  # Makes the edge look cool
                 }
             )
 
