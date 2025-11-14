@@ -9,10 +9,13 @@ import {
   CssBaseline,
   CircularProgress,
   Typography,
+  Drawer,
 } from "@mui/material";
 
 // DO NOT REMOVE. Graph won't work
 import "reactflow/dist/style.css";
+
+const DRAWER_WIDTH = 360; // Width of our sidebar
 
 export default function App() {
   const [nodes, setNodes] = useState([]);
@@ -22,6 +25,7 @@ export default function App() {
 
   const [dept, setDept] = useState("COMP SCI");
   const [number, setNumber] = useState("537");
+  const [selectedNode, setSelectedNode] = useState(null);
 
   const fetchGraph = useCallback(async (fetchDept, fetchNumber) => {
     try {
@@ -51,6 +55,7 @@ export default function App() {
       setNodes(layoutedNodes);
       setEdges(layoutedEdges);
       setError(null);
+      setSelectedNode(null);
     } catch (err) {
       console.error("Error fetching graph data:", err);
       let errorMsg = err.message;
@@ -73,71 +78,85 @@ export default function App() {
     fetchGraph(dept, number);
   };
 
+  const onNodeClick = useCallback((event, node) => {
+    console.log("Clicked node:", node);
+    setSelectedNode(node); // Store the clicked node
+  }, []);
+
+  const onPaneClick = useCallback(() => {
+    setSelectedNode(null);
+  }, []);
+
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      {/* Resets browser CSS for consistency */}
+    <Box sx={{ display: "flex" }}>
+      {/* Resets browser CSS for consistency across browsers */}
       <CssBaseline />
       <Box
-        component="form" // Renders this Box as a <form> element
-        onSubmit={handleSearch}
-        sx={{
-          position: "absolute",
-          top: 20,
-          left: 20,
-          zIndex: 10,
-          background: "white",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          display: "flex",
-          gap: 2, // MUI's spacing unit (2 = 16px)
-          alignItems: "center",
-        }}
+        component="main"
+        sx={{ flexGrow: 1, height: "100vh", width: "100vw", position: "relative" }}
       >
-        <TextField
-          label="Department"
-          variant="outlined"
-          size="small"
-          placeholder="COMP SCI"
-          value={dept}
-          onChange={(e) => setDept(e.target.value.toUpperCase())}
-          sx={{ width: "150px" }}
-        />
-        <TextField
-          label="Number"
-          variant="outlined"
-          size="small"
-          placeholder="537"
-          value={number}
-          onChange={(e) => setNumber(e.target.value)}
-          sx={{ width: "100px" }}
-        />
-        <Button
-          type="submit"
-          variant="contained" // Gives it the solid blue look
-          disabled={loading} // Disables button while loading
+        <Box
+          component="form" // Renders this Box as a <form> element
+          onSubmit={handleSearch}
+          sx={{
+            position: "absolute",
+            top: 20,
+            left: 20,
+            zIndex: 10,
+            background: "white",
+            padding: "16px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            display: "flex",
+            gap: 2, // MUI's spacing unit (2 = 16px)
+            alignItems: "center",
+          }}
         >
-          Search
-        </Button>
+          <TextField
+            label="Department"
+            variant="outlined"
+            size="small"
+            placeholder="COMP SCI"
+            value={dept}
+            onChange={(e) => setDept(e.target.value.toUpperCase())}
+            sx={{ width: "150px" }}
+          />
+          <TextField
+            label="Number"
+            variant="outlined"
+            size="small"
+            placeholder="537"
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            sx={{ width: "100px" }}
+          />
+          <Button
+            type="submit"
+            variant="contained" // Gives it the solid blue look
+            disabled={loading} // Disables button while loading
+          >
+            Search
+          </Button>
 
-        {/* Show a loading spinner or an error message */}
-        {loading && <CircularProgress size={24} sx={{ marginLeft: 1 }} />}
-        {error && (
-          <Typography color="error" sx={{ marginLeft: 1 }}>
-            {error}
-          </Typography>
-        )}
+          {/* Show a loading spinner or an error message */}
+          {loading && <CircularProgress size={24} sx={{ marginLeft: 1 }} />}
+          {error && (
+            <Typography color="error" sx={{ marginLeft: 1 }}>
+              {error}
+            </Typography>
+          )}
+        </Box>
+
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          fitView // zoom the graph to fit all nodes
+        >
+          <Controls />
+          <MiniMap />
+          <Background variant="dots" gap={12} size={1} />
+        </ReactFlow>
       </Box>
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        fitView // zoom the graph to fit all nodes
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
-      </ReactFlow>
-    </div>
+    </Box>
   );
 }
