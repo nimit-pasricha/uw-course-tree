@@ -6,7 +6,7 @@ dagreGraph.setDefaultEdgeLabel(() => ({}));
 const nodeWidth = 172;
 const nodeHeight = 36;
 
-export const getLayoutedElements = (nodes, edges, direction = 'LR') => {
+export const getLayoutedElements = (nodes, edges, direction = 'RL') => {
   // Set the layout direction (LR = Left-to-Right)
   dagreGraph.setGraph({ rankdir: direction });
 
