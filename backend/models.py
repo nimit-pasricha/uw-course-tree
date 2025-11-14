@@ -30,3 +30,13 @@ class Course(db.Model):
         backref="needed_by",
         lazy="select" # only find prereqs when explicitly select .prereqs
     )
+
+    def to_dict(self) -> dict[str, int | str | list[int] | None]:
+        return {
+            "id": self.id,
+            "code": f"{self.dept} {self.number}",
+            "title": self.title,
+            "description": self.description,
+            "credits": self.credits,
+            "prereq_ids": [p.id for p in self.prereqs]
+        }
