@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ReactFlow, { MiniMap, Controls, Background } from "reactflow";
 import axios from "axios";
 import { getLayoutedElements } from "./layout";
@@ -6,7 +6,16 @@ import { getLayoutedElements } from "./layout";
 // DO NOT REMOVE. Graph won't work
 import "reactflow/dist/style.css";
 
-const API_URL = "http://127.0.0.1:5000/api/graph/COMP%20SCI/537";
+const formStyle = {
+  position: "absolute",
+  top: "20px",
+  left: "20px",
+  zIndex: 4, // Make sure it's on top of the graph
+  background: "white",
+  padding: "10px",
+  borderRadius: "8px",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+};
 
 export default function App() {
   const [nodes, setNodes] = useState([]);
@@ -14,39 +23,44 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const getGraphData = async () => {
-      try {
-        setLoading(true);
-        const resp = await axios.get(API_URL);
+  const [dept, setDept] = useState("COMP SCI");
+  const [number, setNumber] = useState("544");
 
-        console.log("API Response:", resp.data);
+  const fetchGraph = useCallback(async (fetchDept, fetchNumber) => {
+    try {
+      setLoading(true);
+      const resp = await axios.get(
+        `http://127.0.0.1:5000/api/graph/${fetchDept}/${fetchNumber}`
+      );
 
-        const initialNodes = resp.data.nodes;
-        const initialEdges = resp.data.edges.map((edge) => {
-          return {
-            ...edge,
-            animated: true,
-            type: "smoothstep",
-          };
-        });
+      console.log("API Response:", resp.data);
 
-        const { nodes: layoutedNodes, edges: layoutedEdges } =
-          getLayoutedElements(initialNodes, initialEdges);
-
-        setNodes(layoutedNodes);
-        setEdges(layoutedEdges);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching graph data:", err);
-        setError("Failed to load course graph.");
-      } finally {
-        setLoading(false);
+      if (resp.data.nodes.length === 0) {
+        throw new Error("Course not found or has no prerequisites.");
       }
-    };
 
-    getGraphData();
-  }, []);
+      const initialNodes = resp.data.nodes;
+      const initialEdges = resp.data.edges.map((edge) => {
+        return {
+          ...edge,
+          animated: true,
+          type: "smoothstep",
+        };
+      });
+
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(initialNodes, initialEdges);
+
+      setNodes(layoutedNodes);
+      setEdges(layoutedEdges);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching graph data:", err);
+      setError("Failed to load course graph.");
+    } finally {
+      setLoading(false);
+    }
+  });
 
   if (loading) {
     return <div style={{ padding: "20px" }}>Loading graph...</div>;
