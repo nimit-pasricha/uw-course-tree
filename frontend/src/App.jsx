@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import Reactflow, { Minimap, Controls, Background } from "reactflow";
+import ReactFlow, { MiniMap, Controls, Background } from "reactflow";
 import axios from "axios";
 
 import "reactflow/dist/style.css";
 
 const API_URL = "http://127.0.0.1:5000/api/graph/COMP%20SCI/537";
 
-function App() {
+export default function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,10 +18,10 @@ function App() {
         setLoading(true);
         const resp = await axios.get(API_URL);
 
-        console.log("API Response:", response.data);
+        console.log("API Response:", resp.data);
 
-        setNodes(response.data.nodes);
-        setEdges(response.data.edges);
+        setNodes(resp.data.nodes);
+        setEdges(resp.data.edges);
         setError(null);
       } catch (err) {
         console.error("Error fetching graph data:", err);
@@ -33,4 +33,26 @@ function App() {
 
     getGraphData();
   }, []);
+
+  if (loading) {
+    return <div style={{ padding: "20px" }}>Loading graph...</div>;
+  }
+
+  if (error) {
+    return <div style={{ padding: "20px", color: "red" }}>{error}</div>;
+  }
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        fitView // This zooms the graph to fit all nodes
+      >
+        <Controls />
+        <MiniMap />
+        <Background variant="dots" gap={12} size={1} />
+      </ReactFlow>
+    </div>
+  );
 }
