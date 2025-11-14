@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import Reactflow, { Minimap, Controls, Background } from "reactflow";
+import axios from "axios";
+
+import "reactflow/dist/style.css";
+
+const API_URL = "http://127.0.0.1:5000/api/graph/COMP%20SCI/537";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  useEffect(() => {
+    const getGraphData = async () => {
+      try {
+        setLoading(true);
+        const resp = await axios.get(API_URL);
+
+        console.log("API Response:", response.data);
+
+        setNodes(response.data.nodes);
+        setEdges(response.data.edges);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching graph data:", err);
+        setError("Failed to load course graph.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getGraphData();
+  }, []);
 }
-
-export default App
