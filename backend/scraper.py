@@ -5,13 +5,12 @@ from models import db, Course
 
 URL = "https://guide.wisc.edu/courses/comp_sci/"
 
+
 def scrape_courses() -> None:
-    
-    
 
     print(f"Fetching data from {URL}...")
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     resp = requests.get(URL, headers=headers)
     resp.raise_for_status()
 
@@ -28,6 +27,7 @@ def scrape_courses() -> None:
         db.session.query(Course).delete()
         db.session.commit()
 
+        # First pass (load courses into DB.)
         for block in course_blocks:
             try:
                 # 1. Extract Course Code (e.g., "COMP SCI 200")
@@ -52,32 +52,26 @@ def scrape_courses() -> None:
                 else:
                     title = full_title_text.replace(full_code, "").strip()
 
-                
                 # 3. Extract Credits
-                credits_p = block.find('p', class_='courseblockcredits')
+                credits_p = block.find("p", class_="courseblockcredits")
                 credits_text = credits_p.get_text().strip() if credits_p else ""
 
                 credits_num = credits_text.split(" ")[0]
 
                 # 4. Extract Description
-                desc_p = block.find('p', class_='courseblockdesc')
+                desc_p = block.find("p", class_="courseblockdesc")
                 description = desc_p.get_text().strip() if desc_p else ""
 
                 db.session.add(
-                    Course(
-                        dept=dept,
-                        number=number,
-                        title=title,
-                        description=description,
-                        credits=credits_num
-                    )
+                    Course(dept=dept, number=number, title=title, description=description, credits=credits_num)
                 )
                 courses_added += 1
             except Exception as e:
                 print(f"Error parsing course: {e}")
-        
+
         db.session.commit()
         print(f"Successfully added {courses_added} courses.")
+
 
 if __name__ == "__main__":
     scrape_courses()
