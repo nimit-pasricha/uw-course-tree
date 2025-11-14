@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ReactFlow, { MiniMap, Controls, Background } from "reactflow";
 import axios from "axios";
 
+// DO NOT REMOVE. Graph won't work
 import "reactflow/dist/style.css";
 
 const API_URL = "http://127.0.0.1:5000/api/graph/COMP%20SCI/537";
@@ -47,7 +48,7 @@ export default function App() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        fitView // This zooms the graph to fit all nodes
+        fitView // zoom the graph to fit all nodes
       >
         <Controls />
         <MiniMap />
