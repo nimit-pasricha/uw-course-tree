@@ -50,7 +50,7 @@ export default function App() {
       });
 
       const { nodes: layoutedNodes, edges: layoutedEdges } =
-        getLayoutedElements(initialNodes, initialEdges);
+        getLayoutedElements(initialNodes, initialEdges, "RL");
 
       setNodes(layoutedNodes);
       setEdges(layoutedEdges);
@@ -88,12 +88,16 @@ export default function App() {
   }, []);
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", width: "100vw" }}>
       {/* Resets browser CSS for consistency across browsers */}
       <CssBaseline />
       <Box
         component="main"
-        sx={{ flexGrow: 1, height: "100vh", width: "100vw", position: "relative" }}
+        sx={{
+          flexGrow: 1,
+          height: "100vh",
+          position: "relative",
+        }}
       >
         <Box
           component="form" // Renders this Box as a <form> element
@@ -151,12 +155,65 @@ export default function App() {
           nodes={nodes}
           edges={edges}
           fitView // zoom the graph to fit all nodes
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
+          style={{"height": "100%"}}
         >
           <Controls />
           <MiniMap />
           <Background variant="dots" gap={12} size={1} />
         </ReactFlow>
       </Box>
+      <Drawer
+        sx={{
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            // Style the paper inside the drawer
+            width: DRAWER_WIDTH,
+            boxSizing: "border-box",
+          },
+        }}
+        variant="permanent"
+        anchor="right"
+        open={true} // Always open
+      >
+        {/* Box to give us padding */}
+        <Box sx={{ padding: 3, paddingTop: 4 }}>
+          {selectedNode ? (
+            <>
+              <Typography variant="h5" gutterBottom>
+                {selectedNode.data.label}
+              </Typography>
+              <Typography variant="h6" gutterBottom color="text.secondary">
+                {selectedNode.data.title}
+              </Typography>
+              <Typography
+                variant="body1"
+                gutterBottom
+                sx={{ fontWeight: "bold" }}
+              >
+                {selectedNode.data.credits} Credits
+              </Typography>
+              <Typography variant="body2" paragraph>
+                {selectedNode.data.description}
+              </Typography>
+              <Typography
+                variant="body2"
+                component={"p"}
+                sx={{ fontStyle: "italic" }}
+              >
+                <strong>Raw Prereq Text:</strong> We'll add this next.
+              </Typography>
+            </>
+          ) : (
+            // Default message
+            <Typography variant="body1" color="text.secondary">
+              Click a course on the graph to see its details.
+            </Typography>
+          )}
+        </Box>
+      </Drawer>
     </Box>
   );
 }

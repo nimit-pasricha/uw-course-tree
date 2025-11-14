@@ -1,12 +1,11 @@
-import dagre from 'dagre';
-
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
+import dagre from "dagre";
 
 const nodeWidth = 172;
 const nodeHeight = 36;
 
-export const getLayoutedElements = (nodes, edges, direction = 'RL') => {
+export const getLayoutedElements = (nodes, edges, direction = "RL") => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
   // Set the layout direction (LR = Left-to-Right)
   dagreGraph.setGraph({ rankdir: direction });
 
@@ -23,7 +22,7 @@ export const getLayoutedElements = (nodes, edges, direction = 'RL') => {
   // Apply the calculated positions to our React Flow nodes
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
-    
+
     // We update the node's position with the new x/y from dagre
     return {
       ...node,
