@@ -1,12 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
-import re
 from app import app
 from models import db, Course
 
 URL = "https://guide.wisc.edu/courses/comp_sci/"
 
-def scrape_courses():
+def scrape_courses() -> None:
     print(f"Fetching data from {URL}...")
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
@@ -26,8 +25,36 @@ def scrape_courses():
         db.session.commit()
 
         for block in course_blocks:
+
+            # 1. Extract Course Code (e.g., "COMP SCI 200")
             code_span = block.find("span", class_="courseblockcode")
             if not code_span:
                 continue
 
             full_code = code_span.get_text().strip().replace("\xa0", " ")
+            parts = full_code.rsplit(" ", 1)
+            if len(parts) == 2:
+                dept, number = parts
+            else:
+                dept = "UNKNOWN"
+                number = full_code
+
+            # 2. Extract title
+            title_p = block.find("p", class_="courseblocktitle")
+            full_title_text = title_p.get_text().strip()
+
+            if "—" in full_title_text:
+                title = full_title_text.split("—", 1)[1].strip()
+            else:
+                title = full_title_text.replace(full_code, "").strip()
+
+            
+            # 3. Extract Credits
+            credits_p = block.find('p', class_='courseblockcredits')
+            credits_text = credits_p.get_text().strip() if credits_p else ""
+
+            credits_num = credits_text.split(" ")[0]
+
+            # 4. Extract Description
+            desc_p = block.find('p', class_='courseblockdesc')
+            description = desc_p.get_text().strip() if desc_p else ""
