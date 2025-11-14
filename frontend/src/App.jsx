@@ -2,20 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 import ReactFlow, { MiniMap, Controls, Background } from "reactflow";
 import axios from "axios";
 import { getLayoutedElements } from "./layout";
+import {
+  Box,
+  TextField,
+  Button,
+  CssBaseline,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 
 // DO NOT REMOVE. Graph won't work
 import "reactflow/dist/style.css";
-
-const formStyle = {
-  position: "absolute",
-  top: "20px",
-  left: "20px",
-  zIndex: 4, // Make sure it's on top of the graph
-  background: "white",
-  padding: "10px",
-  borderRadius: "8px",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-};
 
 export default function App() {
   const [nodes, setNodes] = useState([]);
@@ -72,6 +69,12 @@ export default function App() {
     fetchGraph(dept, number);
   }, [fetchGraph]);
 
+  const handleSearch = (event) => {
+    event.preventDefault(); // Prevent full-page reload
+    console.log(`Searching for: ${dept} ${number}`);
+    fetchGraph(dept, number);
+  };
+
   if (loading) {
     return <div style={{ padding: "20px" }}>Loading graph...</div>;
   }
@@ -82,6 +85,58 @@ export default function App() {
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
+      {/* Resets browser CSS for consistency */}
+      <CssBaseline />
+      <Box
+        component="form" // Renders this Box as a <form> element
+        onSubmit={handleSearch}
+        sx={{
+          position: "absolute",
+          top: 20,
+          left: 20,
+          zIndex: 10,
+          background: "white",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          display: "flex",
+          gap: 2, // MUI's spacing unit (2 = 16px)
+          alignItems: "center",
+        }}
+      >
+        <TextField
+          label="Department"
+          variant="outlined"
+          size="small"
+          value={dept}
+          onChange={(e) => setDept(e.target.value.toUpperCase())}
+          sx={{ width: "150px" }}
+        />
+        <TextField
+          label="Number"
+          variant="outlined"
+          size="small"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+          sx={{ width: "100px" }}
+        />
+        <Button
+          type="submit"
+          variant="contained" // Gives it the solid blue look
+          disabled={loading} // Disables button while loading
+        >
+          Search
+        </Button>
+
+        {/* Show a loading spinner or an error message */}
+        {loading && <CircularProgress size={24} sx={{ marginLeft: 1 }} />}
+        {error && (
+          <Typography color="error" variant="body2" sx={{ marginLeft: 1 }}>
+            {error}
+          </Typography>
+        )}
+      </Box>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
