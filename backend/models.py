@@ -27,4 +27,6 @@ class Course(db.Model):
         secondary=prerequisites,
         primaryjoin=(prerequisites.c.course_id == id),
         secondaryjoin=(prerequisites.c.prereq_id == id),
+        backref="needed_by",
+        lazy="select" # only find prereqs when explicitly select .prereqs
     )
