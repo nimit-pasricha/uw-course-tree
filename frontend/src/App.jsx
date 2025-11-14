@@ -56,11 +56,21 @@ export default function App() {
       setError(null);
     } catch (err) {
       console.error("Error fetching graph data:", err);
-      setError("Failed to load course graph.");
+      let errorMsg = err.message;
+      if (err.response && err.response.status === 404) {
+        errorMsg = `Course ${fetchDept} ${fetchNumber} not found.`;
+      }
+      setError(errorMsg);
+      setNodes([]); // Clear the graph on error
+      setEdges([]);
     } finally {
       setLoading(false);
     }
-  });
+  }, []);
+
+  useEffect(() => {
+    fetchGraph(dept, number);
+  }, [fetchGraph]);
 
   if (loading) {
     return <div style={{ padding: "20px" }}>Loading graph...</div>;
