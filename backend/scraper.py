@@ -64,3 +64,17 @@ def scrape_courses() -> None:
             # 4. Extract Description
             desc_p = block.find('p', class_='courseblockdesc')
             description = desc_p.get_text().strip() if desc_p else ""
+
+            db.session.add(
+                Course(
+                    dept=dept,
+                    number=number,
+                    title=title,
+                    description=description,
+                    credits=credits
+                )
+            )
+            courses_added += 1
+        
+        db.session.commit()
+        print(f"Successfully added {courses_added} courses.")
