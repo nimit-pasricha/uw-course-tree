@@ -40,3 +40,6 @@ class Course(db.Model):
             "credits": self.credits,
             "prereq_ids": [p.id for p in self.prereqs]
         }
+
+    def __repr__(self) -> str:
+        return f"<Course {self.dept} {self.number}>"
