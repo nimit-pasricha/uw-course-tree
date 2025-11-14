@@ -1,7 +1,8 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 from app import app
-from models import db, Course
+from models import db, Course, prerequisites
 
 URL = "https://guide.wisc.edu/courses/comp_sci/"
 
@@ -68,6 +69,65 @@ def scrape_courses() -> None:
                 courses_added += 1
             except Exception as e:
                 print(f"Error parsing course: {e}")
+
+        # Pass 2 to make edges
+        print("Clearing old prerequisites (edges)...")
+        db.session.execute(prerequisites.delete())
+        db.session.commit()
+
+        for block in course_blocks:
+            try:
+                # Identify current course
+                code_span = block.find("span", class_="courseblockcode")
+                if not code_span:
+                    continue
+                full_code = code_span.get_text().strip().replace("\xa0", " ")
+                parts = full_code.rsplit(" ", 1)
+                if len(parts) != 2:
+                    continue
+                curr_dept, curr_number = parts
+
+                current_course = Course.query.filter_by(dept=curr_dept, number=curr_number).first()
+                if not current_course:
+                    continue
+
+                # Find Requisites Text
+                # Strategy: Look for any <p> with class 'courseblockextra' that contains 'Requisites'
+                req_text = ""
+                extras = block.find_all("p", class_="courseblockextra")
+                for extra in extras:
+                    if "Requisites:" in extra.get_text():
+                        # The data is in the span with class 'cbextra-data'
+                        data_span = extra.find("span", class_="cbextra-data")
+                        if data_span:
+                            req_text = data_span.get_text().strip()
+                            req_text = req_text.replace("\xa0", " ")
+                        break
+
+                if not req_text:
+                    continue
+
+                # Find ALL sequences of 3 digits (e.g., 200, 302, 537)
+                # This captures "COMP SCI 200" and implicit lists like "... 200, 220, 302"
+                possible_numbers = re.findall(r"\b(\d{3}[A-Z]?)\b", req_text)
+
+                unique_numbers = set(possible_numbers)
+
+                for num in unique_numbers:
+                    # Try to find this number in our existing courses
+                    prereq_course = Course.query.filter_by(dept=curr_dept, number=num).first()
+
+                    if prereq_course:
+                        # Prevent self-reference (stupid)
+                        if prereq_course.id == current_course.id:
+                            continue
+
+                        if prereq_course not in current_course.prereqs:
+                            current_course.prereqs.append(prereq_course)
+                            print(f"Linked: {current_course.number} -> requires {prereq_course.number}")
+
+            except Exception as e:
+                print(f"Error in Pass 2: {e}")
 
         db.session.commit()
         print(f"Successfully added {courses_added} courses.")
