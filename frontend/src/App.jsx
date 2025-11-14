@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ReactFlow, { MiniMap, Controls, Background } from "reactflow";
 import axios from "axios";
+import { getLayoutedElements } from "./layout";
 
 // DO NOT REMOVE. Graph won't work
 import "reactflow/dist/style.css";
@@ -21,7 +22,8 @@ export default function App() {
 
         console.log("API Response:", resp.data);
 
-        const styledEdges = resp.data.edges.map((edge) => {
+        const initialNodes = resp.data.nodes;
+        const initialEdges = resp.data.edges.map((edge) => {
           return {
             ...edge,
             animated: true,
@@ -29,8 +31,11 @@ export default function App() {
           };
         });
 
-        setNodes(resp.data.nodes);
-        setEdges(styledEdges);
+        const { nodes: layoutedNodes, edges: layoutedEdges } =
+          getLayoutedElements(initialNodes, initialEdges);
+
+        setNodes(layoutedNodes);
+        setEdges(layoutedEdges);
         setError(null);
       } catch (err) {
         console.error("Error fetching graph data:", err);
