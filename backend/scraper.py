@@ -6,10 +6,7 @@ from models import db, Course
 URL = "https://guide.wisc.edu/courses/comp_sci/"
 
 def scrape_courses() -> None:
-
-    print("Deleting old data...")
-    db.session.query(Course).delete()
-    db.session.commit()
+    
     
 
     print(f"Fetching data from {URL}...")
@@ -27,6 +24,7 @@ def scrape_courses() -> None:
     courses_added = 0
 
     with app.app_context():
+        print("Deleting old data...")
         db.session.query(Course).delete()
         db.session.commit()
 
@@ -71,7 +69,7 @@ def scrape_courses() -> None:
                         number=number,
                         title=title,
                         description=description,
-                        credits=credits
+                        credits=credits_num
                     )
                 )
                 courses_added += 1
