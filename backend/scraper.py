@@ -26,6 +26,8 @@ def scrape_courses():
         db.session.commit()
 
         for block in course_blocks:
-            title_div = block.find("p", class_="courseblocktitle")
-            if not title_div:
+            code_span = block.find("span", class_="courseblockcode")
+            if not code_span:
                 continue
+
+            full_code = code_span.get_text().strip().replace("\xa0", " ")
