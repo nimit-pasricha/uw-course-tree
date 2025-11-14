@@ -21,7 +21,7 @@ export default function App() {
   const [error, setError] = useState(null);
 
   const [dept, setDept] = useState("COMP SCI");
-  const [number, setNumber] = useState("544");
+  const [number, setNumber] = useState("537");
 
   const fetchGraph = useCallback(async (fetchDept, fetchNumber) => {
     try {
@@ -58,8 +58,6 @@ export default function App() {
         errorMsg = `Course ${fetchDept} ${fetchNumber} not found.`;
       }
       setError(errorMsg);
-      setNodes([]); // Clear the graph on error
-      setEdges([]);
     } finally {
       setLoading(false);
     }
@@ -74,14 +72,6 @@ export default function App() {
     console.log(`Searching for: ${dept} ${number}`);
     fetchGraph(dept, number);
   };
-
-  if (loading) {
-    return <div style={{ padding: "20px" }}>Loading graph...</div>;
-  }
-
-  if (error) {
-    return <div style={{ padding: "20px", color: "red" }}>{error}</div>;
-  }
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
@@ -108,6 +98,7 @@ export default function App() {
           label="Department"
           variant="outlined"
           size="small"
+          placeholder="COMP SCI"
           value={dept}
           onChange={(e) => setDept(e.target.value.toUpperCase())}
           sx={{ width: "150px" }}
@@ -116,6 +107,7 @@ export default function App() {
           label="Number"
           variant="outlined"
           size="small"
+          placeholder="537"
           value={number}
           onChange={(e) => setNumber(e.target.value)}
           sx={{ width: "100px" }}
@@ -131,7 +123,7 @@ export default function App() {
         {/* Show a loading spinner or an error message */}
         {loading && <CircularProgress size={24} sx={{ marginLeft: 1 }} />}
         {error && (
-          <Typography color="error" variant="body2" sx={{ marginLeft: 1 }}>
+          <Typography color="error" sx={{ marginLeft: 1 }}>
             {error}
           </Typography>
         )}
