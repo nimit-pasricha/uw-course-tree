@@ -21,8 +21,16 @@ export default function App() {
 
         console.log("API Response:", resp.data);
 
+        const styledEdges = resp.data.edges.map((edge) => {
+          return {
+            ...edge,
+            animated: true,
+            type: "smoothstep",
+          };
+        });
+
         setNodes(resp.data.nodes);
-        setEdges(resp.data.edges);
+        setEdges(styledEdges);
         setError(null);
       } catch (err) {
         console.error("Error fetching graph data:", err);
