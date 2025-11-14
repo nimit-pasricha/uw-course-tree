@@ -33,7 +33,12 @@ def get_course_graph(dept, number):
         nodes.append(
             {
                 "id": f"{curr_course.dept}-{curr_course.number}",
-                "data": {"label": f"{curr_course.dept} {curr_course.number}", "title": curr_course.title},
+                "data": {
+                    "label": f"{curr_course.dept} {curr_course.number}",
+                    "title": curr_course.title,
+                    "description": curr_course.description,
+                    "credits": curr_course.credits,
+                },
                 # set a default position; layout handled by the frontend
                 "position": {"x": 0, "y": 0},
             }
